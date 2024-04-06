@@ -1,133 +1,88 @@
+"use client";
 import Image from "next/image";
+import Square from "../components/Square";
+import ImageGrid from "../components/ImageGrid";
+import Pagination from "../components/Pagination";
+import { fetchImages } from "../services/fetchData";
+import React, { useEffect, useState } from "react";
+
+interface ImageData {
+  colSpan: number;
+  rowSpan: number;
+  src: string;
+  alt: string;
+}
 
 export default function Portfolio() {
+  const [images, setImages] = useState<ImageData[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = Math.ceil(images.length / 28);
+
+  const handlePageChange = (page: number): void => {
+    // 逻辑处理，比如设置当前页码
+    setCurrentPage(page);
+    // 可能还有其他逻辑，比如重新获取数据
+  };
+  // let str = ''
+  // for (let i = 0; i<60;i+=1) {
+  //   str = str + `{
+  //     "colSpan": 1,
+  //     "rowSpan": 1,
+  //     "src": "https://picsum.photos/250/250?random=${i+1}",
+  //     "alt": "Tall slender porcelain bottle with natural clay textured body and cork stopper."
+  //   },`
+  // }
+  // console.log("jay-{}{}", str);
+
+  useEffect(() => {
+    const getImages = async () => {
+      const data = await fetchImages();
+      setImages(data);
+    };
+    getImages();
+  }, []);
+
+  const splitImagesIntoGroups = (images: any, groupSize: number) => {
+    const groups = [];
+    for (let i = 0; i < images.length; i += groupSize) {
+      groups.push(images.slice(i, i + groupSize));
+    }
+    return groups;
+  };
+
+  const imageGroups = splitImagesIntoGroups(images, 7);
+  const imageGroupsByPage = imageGroups.slice(
+    currentPage - 1,
+    currentPage - 1 + 4
+  );
+  console.log("jay-currentPage=", JSON.stringify(currentPage));
+  if (currentPage == 2) {
+    for (let i = 0; i < imageGroupsByPage.length; i += 1) {
+      console.log(`jay-${i}=${JSON.stringify(imageGroupsByPage[i])}`);
+    }
+  } else if (currentPage == 1) {
+    for (let i = 0; i < imageGroupsByPage.length; i += 1) {
+      console.log(`jay-${i}=${JSON.stringify(imageGroupsByPage[i])}`);
+    }
+  }
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-8">
-      <div className="container min-h-screen mx-auto px-2 py-4 bg-white">
-        <div className="grid grid-rows-2 gap-2">
-          <div className="grid grid-cols-3 grid-rows-2 gap-1">
-            <div className=" col-span-2 row-span-2 bg-blue-500 aspect-square">
-              <Image
-                src="https://tailwindui.com/img/ecommerce-images/category-page-04-image-card-02.jpg"
-                alt="Olive drab green insulated bottle with flared screw lid and flat top."
-                className="h-full w-full object-cover object-center group-hover:opacity-75"
-                width={500}
-                height={400}
-              />
-            </div>
-            <div className=" bg-purple-500">
-              <Image
-                src="https://tailwindui.com/img/ecommerce-images/category-page-04-image-card-01.jpg"
-                alt="Tall slender porcelain bottle with natural clay textured body and cork stopper."
-                className="h-full w-full object-cover object-center group-hover:opacity-75"
-                width={500}
-                height={400}
-              />
-            </div>
-            <div className="  bg-pink-500">
-              {" "}
-              <Image
-                src="https://tailwindui.com/img/ecommerce-images/category-page-04-image-card-03.jpg"
-                alt="Person using a pen to cross a task off a productivity paper card."
-                className="h-full w-full object-cover object-center group-hover:opacity-75"
-                width={500}
-                height={400}
-              />
-            </div>
-          </div>
-          <div className="grid grid-flow-col grid-cols-3 grid-rows-2 gap-2 aspect-w-1 aspect-h-1">
-            <div className="bg-purple-500">
-              {" "}
-              <Image
-                src="https://tailwindui.com/img/ecommerce-images/category-page-04-image-card-04.jpg"
-                alt="Hand holding black machined steel mechanical pencil with brass tip and top."
-                className="h-full w-full object-cover object-center group-hover:opacity-75"
-                width={500}
-                height={400}
-              />
-            </div>
-            <div className="bg-pink-500">
-              {" "}
-              <Image
-                src="https://tailwindui.com/img/ecommerce-images/category-page-04-image-card-03.jpg"
-                alt="Person using a pen to cross a task off a productivity paper card."
-                className="h-full w-full object-cover object-center group-hover:opacity-75"
-                width={500}
-                height={400}
-              />
-            </div>
-            <div className="aspect-square col-span-2 row-span-2 bg-blue-500">
-              <Image
-                src="https://tailwindui.com/img/ecommerce-images/category-page-04-image-card-02.jpg"
-                alt="Olive drab green insulated bottle with flared screw lid and flat top."
-                className="h-full w-full object-cover object-center group-hover:opacity-75"
-                width={500}
-                height={400}
-              />
-            </div>
-          </div>
+      <div className="container min-h-screen mx-auto px-4 py-4 bg-white">
+        <div className="grid gap-4">
+          {imageGroupsByPage.map((group, index) => (
+            <ImageGrid
+              key={`${currentPage}-${index}`}
+              images={group}
+              imageIndex={index}
+            />
+          ))}
         </div>
       </div>
-      {/* <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6 sm:py-24 lg:max-w-7xl lg:px-8">
-          <h2 className="sr-only">Products</h2>
-
-          <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-8">
-            <a href="#" className="group">
-              <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-lg bg-gray-200 xl:aspect-h-8 xl:aspect-w-7">
-                <Image
-                  src="https://tailwindui.com/img/ecommerce-images/category-page-04-image-card-01.jpg"
-                  alt="Tall slender porcelain bottle with natural clay textured body and cork stopper."
-                  className="h-full w-full object-cover object-center group-hover:opacity-75"
-                  width={500}
-                  height={400}
-                />
-              </div>
-              <h3 className="mt-4 text-sm text-gray-700">Earthen Bottle</h3>
-              <p className="mt-1 text-lg font-medium text-gray-900">$48</p>
-            </a>
-            <a href="#" className="group">
-              <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-lg bg-gray-200 xl:aspect-h-8 xl:aspect-w-7">
-                <Image
-                  src="https://tailwindui.com/img/ecommerce-images/category-page-04-image-card-02.jpg"
-                  alt="Olive drab green insulated bottle with flared screw lid and flat top."
-                  className="h-full w-full object-cover object-center group-hover:opacity-75"
-                  width={500}
-                  height={400}
-                />
-              </div>
-              <h3 className="mt-4 text-sm text-gray-700">Nomad Tumbler</h3>
-              <p className="mt-1 text-lg font-medium text-gray-900">$35</p>
-            </a>
-            <a href="#" className="group">
-              <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-lg bg-gray-200 xl:aspect-h-8 xl:aspect-w-7">
-                <Image
-                  src="https://tailwindui.com/img/ecommerce-images/category-page-04-image-card-03.jpg"
-                  alt="Person using a pen to cross a task off a productivity paper card."
-                  className="h-full w-full object-cover object-center group-hover:opacity-75"
-                  width={500}
-                  height={400}
-                />
-              </div>
-              <h3 className="mt-4 text-sm text-gray-700">Focus Paper Refill</h3>
-              <p className="mt-1 text-lg font-medium text-gray-900">$89</p>
-            </a>
-            <a href="#" className="group">
-              <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-lg bg-gray-200 xl:aspect-h-8 xl:aspect-w-7">
-                <Image
-                  src="https://tailwindui.com/img/ecommerce-images/category-page-04-image-card-04.jpg"
-                  alt="Hand holding black machined steel mechanical pencil with brass tip and top."
-                  className="h-full w-full object-cover object-center group-hover:opacity-75"
-                  width={500}
-                  height={400}
-                />
-              </div>
-              <h3 className="mt-4 text-sm text-gray-700">
-                Machined Mechanical Pencil
-              </h3>
-              <p className="mt-1 text-lg font-medium text-gray-900">$35</p>
-            </a>
-          </div>
-        </div> */}
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={(page) => handlePageChange(page)}
+      />
     </main>
   );
 }
